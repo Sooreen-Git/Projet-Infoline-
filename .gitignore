@@ -1,0 +1,10 @@
+# Ignorer les fichiers de travail locaux de Terraform
+.terraform/
+.terraform.lock.hcl
+
+# Ignorer ABSOLUMENT les fichiers d'état (contiennent des secrets)
+*.tfstate
+*.tfstate.backup
+
+# Ignorer les fichiers de variables personnelles
+*.tfvars
