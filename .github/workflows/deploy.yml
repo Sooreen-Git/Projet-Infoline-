@@ -1,10 +1,10 @@
-name: CI/CD Infoline 2026
+name: CI/CD Infoline 2026 Full-Auto
 on:
   push:
-    branches: [ main ] # Se déclenche à chaque push sur la branche main
+    branches: [ main ]
 
 jobs:
-  build-and-push:
+  terraform-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout du code
@@ -17,6 +17,17 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-3
 
+      # --- ÉTAPE TERRAFORM (Reconstruction automatique) ---
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+
+      # --- ÉTAPE DOCKER (Build et Push) ---
       - name: Connexion à Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
@@ -27,7 +38,5 @@ jobs:
           ECR_REPOSITORY: infoline-app-repo
           IMAGE_TAG: latest
         run: |
-          # Construction de l'image (utilise ton Dockerfile multi-stage)
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          # Envoi vers ton repo à Paris
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
